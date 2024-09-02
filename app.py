@@ -3,6 +3,7 @@ from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing import sequence
 
 from flask import Flask, render_template, request
+from forms.TextAnalyzerForm import TextAnalyzerForm
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 
 app = Flask(__name__)
@@ -34,12 +35,13 @@ def sentiment_analysis(input):
 @app.route("/", methods=["GET", "POST"])
 def index():
     sentiment = {}
+    form = TextAnalyzerForm()
     if request.method == "POST":
-        text = request.form.get("user_text")
+        text = form.text.data
         analyzer = SentimentIntensityAnalyzer()
         sentiment = analyzer.polarity_scores(text)
         sentiment["custom model positive"] = sentiment_analysis(text)
-    return render_template('form.html', sentiment=sentiment)
+    return render_template('form.html', form=form, sentiment=sentiment)
 
 if __name__ == "__main__":
     app.run()
