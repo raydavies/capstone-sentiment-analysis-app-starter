@@ -40,7 +40,7 @@ def index():
         text = form.text.data
         analyzer = SentimentIntensityAnalyzer()
         sentiment = analyzer.polarity_scores(text)
-        sentiment["custom model positive"] = sentiment_analysis(text)
+        sentiment["custom_model_positive"] = sentiment_analysis(text)
     return render_template('form.html', form=form, sentiment=sentiment)
 
 if __name__ == "__main__":

@@ -7,18 +7,118 @@
         <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
     </head>
     <body>
-        <form method="POST">
-            {{ form.hidden_tag() }} {{ form.text.label }}<br />
-            {{ form.text(rows=5, cols=50) }}<br />
-            {{ form.submit() }}
-        </form>
+        <div class="container text-center">
+            <h1>SentimentScope</h1>
+            <div class="row justify-content-center mb-4">
+                <form method="POST">
+                    <div class="mb-3 col-12">
+                        {{ form.hidden_tag() }}
+                        {{ form.text(rows=5, cols=50, class="form-control", placeholder="Enter some text to test our sentiment analyzer!") }}
+                    </div>
+                    <div class="col-12">
+                        {{ form.submit(class="btn btn-primary") }}
+                    </div>
+                </form>
+            </div>
+
+            {% if sentiment %}
+            <h3>Results</h3>
+            <div class="row">
+                <div class="col-md-6">
+                    <h4>Vader Sentiment Analysis</h4>
+                    <div id="pieChart" class="row justify-content-center"></div>
+                    <div id="compoundChart" class="row justify-content-center"></div>
+                </div>
+                <div class="col-md-6">
+                    <h4>Custom Model Sentiment Analysis</h4>
+                    <div id="customChart" class="row justify-content-center"></div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
 
         {% if sentiment %}
-            <p>Positive: {{ sentiment['pos'] * 100 }}%</p>
-            <p>Negative: {{ sentiment['neg'] * 100 }}%</p>
-            <p>Neutral: {{ sentiment['neu'] * 100 }}%</p>
-            <p>Compound: {{ sentiment['compound'] * 100 }}%</p>
-            <p>Custom Model Positive: {{ sentiment['custom model positive'] * 100 }}%</p>
+            <script>
+                var pieData = [{
+                    values: [{{ sentiment['pos'] * 100 }}, {{ sentiment['neu'] * 100 }}, {{ sentiment['neg'] * 100 }}],
+                    labels: ['Positive', 'Neutral', 'Negative'],
+                    type: 'pie',
+                    automargin: true,
+                    marker: {
+                        colors: ['rgba(25, 135, 84, 0.85)', 'rgba(255, 193, 7, 0.85)', 'rgba(220, 53, 69, 0.85)']
+                    },
+                }];
+
+                var pieLayout = {
+                    height: 400,
+                    width: 500
+                };
+
+                var compoundData = [
+                {
+                    type: "indicator",
+                    mode: "gauge+number",
+                    value: {{ sentiment['compound'] }},
+                    title: {text: "Compound", font: {size: 20}},
+                    font: { color: "black", family: "roboto" },
+                    delta: { position : "top", reference: 0, increasing: { color: "#49b170" } },
+                    gauge: {
+                        paddingTop: 50,
+                        axis: { range: [-1, 1], tickwidth: 2, tickcolor: "black" },
+                        bar: { color: "#000" },
+                        bgcolor: "#f4f4f4",
+                        borderwidth: 2,
+                        bordercolor: "black",
+                        steps: [
+                            { range: [-1, -0.333], color: "rgba(220, 53, 69, 0.85)" },
+                            { range: [-0.333, 0.333], color: "rgba(255, 193, 7, 0.85)"},
+                            { range: [0.333, 1], color: "rgba(25, 135, 84, 0.85)" }
+                        ],
+                    }
+                }];
+
+                var compoundLayout = {
+                    width: 400,
+                    height: 300,
+                    margin: { t: 25, r: 25, l: 25, b: 25 },
+                    paper_bgcolor: "white",
+                    font: { color: "#333333", family: "roboto" }
+                };
+
+                var customData = [
+                {
+                    type: "indicator",
+                    mode: "gauge+number",
+                    value: {{ sentiment['custom_model_positive'] * 100 }},
+                    font: { color: "black", family: "roboto" },
+                    delta: { position : "top", reference: 0, increasing: { color: "#49b170" } },
+                    gauge: {
+                        paddingTop: 50,
+                        axis: { range: [0, 100], tickwidth: 2, tickcolor: "black" },
+                        bar: { color: "#000" },
+                        bgcolor: "#f4f4f4",
+                        borderwidth: 2,
+                        bordercolor: "black",
+                        steps: [
+                            { range: [0, 33.333], color: "rgba(220, 53, 69, 0.85)" },
+                            { range: [33.333, 66.666], color: "rgba(255, 193, 7, 0.85)"},
+                            { range: [66.666, 100], color: "rgba(25, 135, 84, 0.85)" }
+                        ],
+                    }
+                }];
+
+                var customLayout = {
+                    width: 400,
+                    height: 300,
+                    margin: { t: 25, r: 25, l: 25, b: 25 },
+                    paper_bgcolor: "white",
+                    font: { color: "#333333", family: "roboto" }
+                };
+                
+                Plotly.newPlot('pieChart', pieData, pieLayout);
+                Plotly.newPlot('compoundChart', compoundData, compoundLayout)
+                Plotly.newPlot('customChart', customData, customLayout)
+            </script>
         {% endif %}
     </body>
 </html>
